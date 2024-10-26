@@ -2,10 +2,14 @@
 {
     public sealed class Truck
     {
-        public string Modelo { get; set; }
-        public int AnoFabricacao { get; set; }
-        public string CodigoChassi { get; set; }
-        public string Cor { get; set; }
-        public string Planta { get; set; }
+        public Guid Id { get; set; }
+        public int YearOfManufacture { get; set; }
+        public string ChassisCode { get; set; }
+        public string Color { get; set; }
+
+        public int ModelId { get; set; }
+        public Model Model { get; set; }
+        public int PlantId { get; set; }
+        public Plant Plant { get; set; }
     }
 }
