@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using WebApi.Handlers;
 
 namespace WebApi
 {
@@ -7,16 +9,20 @@ namespace WebApi
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            builder.Configuration.AddJsonFile("appsettings.json", optional: false)
+                                 .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: false)
+                                 .Build();
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddDbContext<TruckDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("TruckConnection")));
+
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            app.UseMiddleware<ExceptionMiddleware>();
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -24,9 +30,6 @@ namespace WebApi
             }
 
             app.UseHttpsRedirection();
-
-            app.UseAuthorization();
-
 
             app.MapControllers();
 
