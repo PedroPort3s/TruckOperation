@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using WebApi.Handlers;
 using WebApi.Controllers;
 using Models;
+using UnitTests.TestData;
+using Microsoft.AspNetCore.Http;
+using System.Net;
 
 namespace UnitTests
 {
@@ -23,24 +26,8 @@ namespace UnitTests
             var context = GetInMemoryDbContext("TestDatabase_GetTrucks");
             context.Trucks.AddRange(new List<Truck>
             {
-                new Truck 
-                { 
-                    Id = Guid.NewGuid(), 
-                    YearOfManufacture = 2020, 
-                    ChassisCode = "ABC123", 
-                    Color = "Red", 
-                    ModelId = 1, 
-                    PlantId = 1 
-                },
-                new Truck 
-                { 
-                    Id = Guid.NewGuid(), 
-                    YearOfManufacture = 2021, 
-                    ChassisCode = "DEF456", 
-                    Color = "Blue", 
-                    ModelId = 2, 
-                    PlantId = 2 
-                }
+                TrucksTestDataGenerator.CreateTruckInstance(year: 2020,color: "Red",chassisCode: "ABC123",modelId: 1 ,plantId: 1),
+                TrucksTestDataGenerator.CreateTruckInstance(year: 2021,color: "Blue",chassisCode: "DEF456",modelId: 2 ,plantId: 2)
             });
             await context.SaveChangesAsync();
 
@@ -58,15 +45,7 @@ namespace UnitTests
         {
             var context = GetInMemoryDbContext("TestDatabase_GetTruck");
             var truckId = Guid.NewGuid();
-            context.Trucks.Add(new Truck 
-            { 
-                Id = truckId, 
-                YearOfManufacture = 2020, 
-                ChassisCode = "ABC123", 
-                Color = "Red", 
-                ModelId = 1, 
-                PlantId = 1 
-            });
+            context.Trucks.Add(TrucksTestDataGenerator.CreateTruckInstance(year: 2020, color: "Red", chassisCode: "ABC123", modelId: 1, plantId: 1, id: truckId));
             await context.SaveChangesAsync();
 
             var controller = new TrucksController(context);
@@ -89,6 +68,22 @@ namespace UnitTests
             Assert.IsType<NotFoundResult>(result.Result);
         }
 
+        [Theory]
+        [ClassData(typeof(InvalidTrucksTestDataGenerator))]
+        public async Task PostTruck_AddsNewTruckWithoutRequiredFields(Truck truck)
+        {
+            var context = GetInMemoryDbContext("TestDatabase_PostBatchInvalidTruck");
+            
+            var controller = new TrucksController(context);
+
+            var exception = await Assert.ThrowsAsync<BadHttpRequestException>(async () => 
+            {
+                _ = await controller.PostTruck(truck);
+            });
+
+            Assert.Equal((int)HttpStatusCode.BadRequest, exception.StatusCode);
+        }
+        
         [Fact]
         public async Task PostTruck_AddsNewTruck()
         {
@@ -97,16 +92,8 @@ namespace UnitTests
             await context.SaveChangesAsync();
 
             var controller = new TrucksController(context);
-            var newTruck = new Truck
-            {
-                Id = Guid.NewGuid(),
-                YearOfManufacture = 2022,
-                ChassisCode = "GHI789",
-                Color = "Green",
-                ModelId = 1,
-                PlantId = 1
-            };
-
+            var newTruck = TrucksTestDataGenerator.CreateTruckInstance(year: 2022, color: "Green", chassisCode: "GHI789", modelId: 1, plantId: 1);
+            
             var result = await controller.PostTruck(newTruck);
             var createdResult = result.Result as CreatedAtActionResult;
             var truck = createdResult.Value as Truck;
@@ -120,27 +107,11 @@ namespace UnitTests
         public async Task PutTruck_UpdatesExistingTruck()
         {
             var context = GetInMemoryDbContext("TestDatabase_PutTruck");
-            var truckId = Guid.NewGuid();
-            var initialTruck = new Truck
-            {
-                Id = truckId,
-                YearOfManufacture = 2020,
-                ChassisCode = "ABC123",
-                Color = "Red",
-                ModelId = 1,
-                PlantId = 1
-            };
+            
+            var initialTruck = TrucksTestDataGenerator.CreateTruckInstance(year: 2020, color: "Red", chassisCode: "ABC123", modelId: 1, plantId: 1);
 
-            var updatedTruck = new Truck
-            {
-                Id = initialTruck.Id,
-                YearOfManufacture = 2021,
-                ChassisCode = "XYZ987",
-                Color = "Blue",
-                ModelId = initialTruck.ModelId,
-                PlantId = initialTruck.PlantId
-            };
-
+            var updatedTruck = TrucksTestDataGenerator.CreateTruckInstance(year: 2021, color: "Blue", chassisCode: "XYZ987", modelId: initialTruck.ModelId, plantId: initialTruck.PlantId, id: initialTruck.Id);
+            
             MockModelsAndPlants(context);
 
             context.Trucks.Add(initialTruck);
@@ -149,10 +120,10 @@ namespace UnitTests
             var controller = new TrucksController(context);
             context.Entry(initialTruck).State = EntityState.Detached;
 
-            var result = await controller.PutTruck(truckId, updatedTruck);
+            var result = await controller.PutTruck(initialTruck.Id, updatedTruck);
 
             Assert.IsType<OkObjectResult>(result);
-            var truckInDb = await context.Trucks.FindAsync(truckId);
+            var truckInDb = await context.Trucks.FindAsync(initialTruck.Id);
             Assert.Equal(2021, truckInDb.YearOfManufacture);
             Assert.Equal("XYZ987", truckInDb.ChassisCode);
             Assert.Equal("Blue", truckInDb.Color);
@@ -194,27 +165,42 @@ namespace UnitTests
             Assert.IsType<BadRequestResult>(result);
         }
 
+        [Theory]
+        [ClassData(typeof(InvalidTrucksTestDataGenerator))]
+        public async Task PutTruck_EditTruckWithoutRequiredFields(Truck truck)
+        {
+            var context = GetInMemoryDbContext("TestDatabase_PutBatchInvalidTruck");
+
+            context.Trucks.Add(truck);
+
+            await context.SaveChangesAsync();
+
+            var controller = new TrucksController(context);
+
+            var exception = await Assert.ThrowsAsync<BadHttpRequestException>(async () =>
+            {
+                _ = await controller.PutTruck(truck.Id, truck);
+            });
+
+            Assert.Equal((int)HttpStatusCode.BadRequest, exception.StatusCode);
+        }
+
         [Fact]
         public async Task DeleteTruck_RemovesTruck()
         {
             var context = GetInMemoryDbContext("TestDatabase_DeleteTruck");
-            var truckId = Guid.NewGuid();
-            context.Trucks.Add(new Truck
-            {
-                Id = truckId,
-                YearOfManufacture = 2020,
-                ChassisCode = "ABC123",
-                Color = "Red",
-                ModelId = 1,
-                PlantId = 1
-            });
+
+            var truck = TrucksTestDataGenerator.CreateTruckInstance(year: 2020, color: "Red", chassisCode: "ABC123", modelId: 1, plantId: 1);
+
+            context.Trucks.Add(truck);
+
             await context.SaveChangesAsync();
 
             var controller = new TrucksController(context);
-            var result = await controller.DeleteTruck(truckId);
+            var result = await controller.DeleteTruck(truck.Id);
 
             Assert.IsType<NoContentResult>(result);
-            var truckInDb = await context.Trucks.FindAsync(truckId);
+            var truckInDb = await context.Trucks.FindAsync(truck.Id);
             Assert.Null(truckInDb);
         }
         
