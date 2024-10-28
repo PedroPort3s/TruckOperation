@@ -50,7 +50,7 @@ The project is configured to use `mssqllocaldb`, created above, for the database
 }
 ```
 
-#### 2.2 Applying EF migrations to the database to be used by the project
+#### 2.3 Applying EF migrations to the database to be used by the project
 1. Open the solution in Visual Studio.
 2. Open the Package Manager Console (PMC) in Visual Studio.
 3. Set the default project to `WebApi`.
