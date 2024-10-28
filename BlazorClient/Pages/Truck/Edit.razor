@@ -16,21 +16,21 @@
     <ValidationSummary />
 
     <div class="form-group">
-        <label>Id:</label>
+        <label>Id</label>
         <input enabled="false" readonly="readonly" @bind="_editTruckVm.Id" class="form-control" />
     </div>
     <div class="form-group">
-        <label>Year Of Manufacture:</label>
+        <label>Year Of Manufacture</label>
         <InputNumber @bind-Value="_editTruckVm.YearOfManufacture" class="form-control" />
         <ValidationMessage For="@(() => _editTruckVm.YearOfManufacture)" />
     </div>
     <div class="form-group">
-        <label>Chassis Code:</label>
+        <label>Chassis Code</label>
         <InputText @bind-Value="_editTruckVm.ChassisCode" class="form-control" />
         <ValidationMessage For="@(() => _editTruckVm.ChassisCode)" />
     </div>
     <div class="form-group">
-        <label>Color:</label>
+        <label>Color</label>
         <InputText @bind-Value="_editTruckVm.Color" class="form-control" />
         <ValidationMessage For="@(() => _editTruckVm.Color)" />
     </div>
@@ -124,9 +124,9 @@
                 PlantId = _editTruckVm.PlantId
             };
 
-            Truck editedTruck = await truckRepo.PutTruckAsync(toBeEdited);
+            _ = await truckRepo.PutTruckAsync(toBeEdited);
 
-            PopulateTruckViewModel(editedTruck);
+            Navigation.NavigateTo("/");
         }
         catch (ApiResponseException ex)
         {

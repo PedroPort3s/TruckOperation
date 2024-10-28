@@ -16,17 +16,17 @@
     <ValidationSummary />
 
     <div class="form-group">
-        <label>Year Of Manufacture:</label>
+        <label>Year Of Manufacture</label>
         <InputNumber @bind-Value="newTruckVm.YearOfManufacture" class="form-control" />
         <ValidationMessage For="@(() => newTruckVm.YearOfManufacture)" />
     </div>
     <div class="form-group">
-        <label>Chassis Code:</label>
+        <label>Chassis Code</label>
         <InputText @bind-Value="newTruckVm.ChassisCode" class="form-control" />
         <ValidationMessage For="@(() => newTruckVm.ChassisCode)" />
     </div>
     <div class="form-group">
-        <label>Color:</label>
+        <label>Color</label>
         <InputText @bind-Value="newTruckVm.Color" class="form-control" />
         <ValidationMessage For="@(() => newTruckVm.Color)" />
     </div>
@@ -61,10 +61,12 @@
         </div>
     }
 
+    <br/>
     <button type="submit" class="btn btn-primary">Create</button>
 
     @if (!string.IsNullOrEmpty(responseMessage))
     {
+        <br />
         <div class="alert alert-info">@responseMessage</div>
     }
 </EditForm>
