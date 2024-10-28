@@ -23,7 +23,7 @@ Truck Operations is a comprehensive web application built with Blazor WebAssembl
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/TruckOperations.git
+git clone https://github.com/PedroPort3s/TruckOperation.git
 cd TruckOperations
 ```
 
