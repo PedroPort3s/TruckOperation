@@ -17,11 +17,21 @@ namespace WebApi
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy", builder =>
+                    builder.WithOrigins("*")
+                           .AllowAnyMethod()
+                           .AllowAnyHeader());
+            });
+
             builder.Services.AddDbContext<TruckDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("TruckConnection")));
 
             var app = builder.Build();
 
             app.UseMiddleware<ExceptionMiddleware>();
+
+            app.UseCors("CorsPolicy");
 
             if (app.Environment.IsDevelopment())
             {
