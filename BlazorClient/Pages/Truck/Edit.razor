@@ -1,0 +1,140 @@
+﻿@page "/truck/edit/{truckId:guid}"
+
+@using BlazorClient.Repositories.Interfaces
+@using BlazorClient.ViewModel
+@using Models.Exceptions
+@inject NavigationManager Navigation
+@inject ITruckRepository truckRepo;
+@inject IModelRepository modelRepo;
+@inject IPlantRepository plantRepo;
+
+<PageTitle>Edit truck</PageTitle>
+<h3>Edit</h3>
+
+<EditForm Model="_editTruckVm" OnValidSubmit="SubmitForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label>Id</label>
+        <input enabled="false" readonly="readonly" @bind="_editTruckVm.Id" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Year Of Manufacture</label>
+        <InputNumber @bind-Value="_editTruckVm.YearOfManufacture" class="form-control" />
+        <ValidationMessage For="@(() => _editTruckVm.YearOfManufacture)" />
+    </div>
+    <div class="form-group">
+        <label>Chassis Code</label>
+        <InputText @bind-Value="_editTruckVm.ChassisCode" class="form-control" />
+        <ValidationMessage For="@(() => _editTruckVm.ChassisCode)" />
+    </div>
+    <div class="form-group">
+        <label>Color</label>
+        <InputText @bind-Value="_editTruckVm.Color" class="form-control" />
+        <ValidationMessage For="@(() => _editTruckVm.Color)" />
+    </div>
+
+    @if (_models != null)
+    {
+        <div class="form-group">
+            <label class="form-label">Model</label>
+            <select @bind="_editTruckVm.ModelId" class="form-select" aria-label="" id="selModel">
+                <option value=""></option>
+                @foreach (var item in _models)
+                {
+                    <option value=@item.Id>@item.Name</option>
+                }
+            </select>
+            <ValidationMessage For="@(() => _editTruckVm.ModelId)" />
+        </div>
+    }
+
+    @if (_plants != null)
+    {
+        <div class="form-group">
+            <label class="form-label">Plant</label>
+            <select @bind="_editTruckVm.PlantId" class="form-select" aria-label="" id="selPlant">
+                <option value=""></option>
+                @foreach (var item in _plants)
+                {
+                    <option value=@item.Id>@item.CountryName</option>
+                }
+            </select>
+            <ValidationMessage For="@(() => _editTruckVm.PlantId)" />
+        </div>
+    }
+    <br/>
+    <button type="submit" class="btn btn-primary">Edit</button>
+
+    @if (!string.IsNullOrEmpty(responseMessage))
+    {
+        <br/>
+        <div class="alert alert-info">@responseMessage</div>
+    }
+</EditForm>
+
+@code {
+    [Parameter] public Guid truckId { get; set; }
+    private string responseMessage;
+    Plant[] _plants;
+    Model[] _models;
+    TruckViewModel _editTruckVm { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _editTruckVm = new TruckViewModel();
+        _plants = await plantRepo.GetPlantsAsync();
+        _models = await modelRepo.GetModelsAsync();
+    }
+
+    protected async override Task OnParametersSetAsync()
+    {
+        Truck truck = await GetTruckToBeEdited(truckId);
+        PopulateTruckViewModel(truck);
+    }
+
+    async Task<Truck> GetTruckToBeEdited(Guid id)
+    {
+        Truck truck = await truckRepo.GetTruckAsync(id);
+        return truck;
+    }
+
+    void PopulateTruckViewModel(Truck truck)
+    {
+        _editTruckVm.Id = truck.Id;
+        _editTruckVm.YearOfManufacture = truck.YearOfManufacture;
+        _editTruckVm.Color = truck.Color;
+        _editTruckVm.ChassisCode = truck.ChassisCode;
+        _editTruckVm.PlantId = truck.PlantId;
+        _editTruckVm.ModelId = truck.ModelId;
+    }
+
+    private async Task SubmitForm()
+    {
+        try
+        {
+            Truck toBeEdited = new Truck
+            {
+                Id = truckId,
+                ChassisCode = _editTruckVm.ChassisCode,
+                Color = _editTruckVm.Color,
+                YearOfManufacture = _editTruckVm.YearOfManufacture,
+                ModelId = _editTruckVm.ModelId,
+                PlantId = _editTruckVm.PlantId
+            };
+
+            _ = await truckRepo.PutTruckAsync(toBeEdited);
+
+            Navigation.NavigateTo("/");
+        }
+        catch (ApiResponseException ex)
+        {
+            responseMessage = ex.Message;
+        }
+        catch (Exception)
+        {
+            responseMessage = $"An error has occurred.";
+        }
+    }
+}

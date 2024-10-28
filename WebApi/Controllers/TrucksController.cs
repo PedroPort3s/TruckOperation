@@ -72,6 +72,10 @@ namespace WebApi.Controllers
         {
             await ValidateTruckUpsert(truck);
 
+            truck.Id = Guid.NewGuid();
+
+            _context.Entry(truck).State = EntityState.Added;
+
             _context.Trucks.Add(truck);
 
             await _context.SaveChangesAsync();
@@ -111,7 +115,7 @@ namespace WebApi.Controllers
                 throw new BadHttpRequestException("A plant should be informed.", (int)HttpStatusCode.BadRequest);
             }
 
-            if (truck.YearOfManufacture <= 1928 || truck.YearOfManufacture > 2999)
+            if (truck.YearOfManufacture < 1928 || truck.YearOfManufacture > 2999)
             {
                 throw new BadHttpRequestException($"{nameof(truck.YearOfManufacture)} must be between 1928 and 2999", (int)HttpStatusCode.BadRequest);
             }
