@@ -1,0 +1,100 @@
+﻿@page "/"
+@using BlazorClient.Repositories.Interfaces
+@inject ITruckRepository truckRepo;
+@inject IModelRepository modelRepo;
+@inject IPlantRepository plantRepo;
+
+<PageTitle>Trucks</PageTitle>
+<h3>Trucks</h3>
+
+@if (_trucks == null)
+{
+    <text>Loading...</text>
+}
+else if (_trucks.Length == 0)
+{
+    <text>No trucks were added to the application.</text>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Model</th>
+                <th scope="col">Year of manufacturing</th>
+                <th scope="col">Color</th>
+                <th scope="col">Chassis Code</th>
+                <th scope="col">Plant</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Truck truck in _trucks)
+            {
+                <tr>
+                    <td>@truck.Model.Name</td>
+                    <td>@truck.YearOfManufacture</td>
+                    <td>@truck.Color</td>
+                    <td>@truck.ChassisCode</td>
+                    <td>@truck.Plant.CountryName</td>
+                    <td>
+                        <a class="btn btn-success" href="truck/edit/@truck.Id">Edit</a>&nbsp;&nbsp;
+                        <button class="btn btn-danger" @onclick="@(() => DeleteTruck(truck.Id))">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<br/>
+<a class="btn btn-success" href="truck/create">Create</a>
+
+@if (!string.IsNullOrEmpty(responseMessage))
+{
+    <div class="alert alert-info">@responseMessage</div>
+}
+
+@code {
+    string responseMessage;
+    Truck[] _trucks;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetAllTrucks();
+    }
+
+    async Task GetAllTrucks()
+    {
+        try
+        {
+            Truck[] trucks = await truckRepo.GetTrucksAsync();
+
+            if (trucks.Length > 0)
+            {
+                for (int i = 0; i < trucks.Length; i++)
+                {
+                    Truck truck = trucks[i];
+                    truck.Model = await modelRepo.GetModelAsync(truck.ModelId);
+                    truck.Plant = await plantRepo.GetPlantAsync(truck.PlantId);
+                }
+            }
+
+            _trucks = trucks;
+        }
+        catch (Exception ex)
+        {
+            responseMessage = "An error has ocurred.";
+        }
+    }
+
+    async Task DeleteTruck(Guid id)
+    {
+        bool deleted = await truckRepo.DeleteTruckAsync(id);
+
+        if (deleted)
+        {
+            await GetAllTrucks();
+        }
+    }
+}
