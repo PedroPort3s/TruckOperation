@@ -32,7 +32,7 @@ cd TruckOperation
 
 ### 2. Set Up the Database
 
-#### 2.1 Setting Up the Local Database
+### 1. Setting Up the Local Database
 To set up the local database, you need to run the following commands:
 
 ```bash
@@ -40,7 +40,7 @@ sqllocaldb create mssqllocaldb
 sqllocaldb start mssqllocaldb
 ```
 
-#### 2.2 Database Configuration
+### 2. Database Configuration
 The project is configured to use `mssqllocaldb`, created above, for the database. The connection string is defined in `WebApi -> appsettings.Development.json` as follows:
 
 ```json
@@ -50,7 +50,7 @@ The project is configured to use `mssqllocaldb`, created above, for the database
 }
 ```
 
-#### 2.3 Applying EF migrations to the database to be used by the project
+### 3. Applying EF migrations to the database to be used by the project
 1. Open the solution in Visual Studio.
 2. Open the Package Manager Console (PMC) in Visual Studio.
 3. Set the default project to `WebApi`.
