@@ -32,37 +32,37 @@ cd TruckOperation
 
 ### 2. Set Up the Database
 
-### 1. Setting Up the Local Database
-To set up the local database, you need to run the following commands:
+1. **Setting Up the Local Database**
+- To set up the local database, you need to run the following commands:
 
-```bash
-sqllocaldb create mssqllocaldb
-sqllocaldb start mssqllocaldb
-```
+    ```bash
+    sqllocaldb create mssqllocaldb
+    sqllocaldb start mssqllocaldb
+    ```
 
-### 2. Database Configuration
-The project is configured to use `mssqllocaldb`, created above, for the database. The connection string is defined in `WebApi -> appsettings.Development.json` as follows:
+2. **Database Configuration**
+- The project is configured to use `mssqllocaldb`, created above, for the database. The connection string is defined in `WebApi -> appsettings.Development.json` as follows:
 
-```json
-...
-"ConnectionStrings": {
-    "TruckConnection": "Server=(localdb)\\mssqllocaldb;Database=TruckOperation;Trusted_Connection=True;"
-}
-```
+    ```json
+    ...
+    "ConnectionStrings": {
+        "TruckConnection": "Server=(localdb)\\mssqllocaldb;Database=TruckOperation;Trusted_Connection=True;"
+    }
+    ```
 
-### 3. Applying EF migrations to the database to be used by the project
-1. Open the solution in Visual Studio.
-2. Open the Package Manager Console (PMC) in Visual Studio.
-3. Set the default project to `WebApi`.
-4. Be sure to have EF tools instaled
-```bash
-dotnet tool install --global dotnet-ef --version 8.*
-```
-5. Run the following command to apply the migrations and set up the database:
+3. **Applying EF migrations to the database to be used by the project**
+   1. Open the solution in Visual Studio.
+   2. Open the Package Manager Console (PMC) in Visual Studio.
+   3. Set the default project to `WebApi`.
+   4. Be sure to have EF tools instaled
+   ```bash
+   dotnet tool install --global dotnet-ef --version 8.*
+   ```
+   5. Run the following command to apply the migrations and set up the database:
 
-```bash
-Update-Database
-```
+   ```bash
+   Update-Database
+   ```
 
 ### **Running the Application**
 
