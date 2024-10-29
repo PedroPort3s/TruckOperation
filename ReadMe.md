@@ -36,6 +36,7 @@ cd TruckOperation
 - To set up the local database, you need to run the following commands:
 
     ```bash
+    cd WebApi
     sqllocaldb create mssqllocaldb
     sqllocaldb start mssqllocaldb
     ```
@@ -49,20 +50,21 @@ cd TruckOperation
         "TruckConnection": "Server=(localdb)\\mssqllocaldb;Database=TruckOperation;Trusted_Connection=True;"
     }
     ```
+- If you want, you can define your own connection string using any other SQL Server instance.
 
 3. **Applying EF migrations to the database to be used by the project**
    1. Open the solution in Visual Studio.
    2. Open the Package Manager Console (PMC) in Visual Studio.
    3. Set the default project to `WebApi`.
    4. Be sure to have EF tools instaled
-   ```bash
-   dotnet tool install --global dotnet-ef --version 8.*
-   ```
+    ```bash
+    dotnet tool install --global dotnet-ef --version 8.*
+    ```
    5. Run the following command to apply the migrations and set up the database:
 
-   ```bash
-   Update-Database
-   ```
+    ```bash
+    dotnet ef database update
+    ```
 
 ### **Running the Application**
 
